@@ -18,6 +18,12 @@ body, html {
 }
 
 h1 {
-	margin:50px auto; text-align:center; color:#fff;
+	text-align: center; 
+	color:#fff;
+}
+
+input {
+	/*top right bottom left */
+	margin: 10px 0px 5px 50px;
 }
 

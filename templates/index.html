@@ -3,16 +3,12 @@
 {% block content %}
 <h1>Welcome to Flask</h1>
 
-{% if 'audio_files' in context.keys() %}
-	<h1>Yo</h1>
-{% endif %}
-
 <div style="background-color: white;">
 	<div class="row">
 		<form action="/convert" method="post" enctype="multipart/form-data">
-		<input type="file" name="files" multiple>
-		<input type="submit" value="convert">
-	</form>
+			<input type="file" name="files" multiple>
+			<input type="submit" value="convert">
+		</form>
 	</div>
 	
 	<div class="row">
@@ -20,6 +16,12 @@
     		<input type="submit" value="get audio files">
 		</form>
 	</div>
+
+	{% if 'audio_files' in context.keys() %}
+	<div class="row">
+		<h1 style="color: black;">Yo</h1>
+	</div>
+	{% endif %}
 	
 </div>
 
