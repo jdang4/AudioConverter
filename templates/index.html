@@ -1,20 +1,26 @@
 {% extends 'base.html' %}
 
 {% block content %}
-	<div class="container">
-		<h1>{% block title %} Welcome to Flask {% endblock %}</h1>
-		{% if 'audio_files' in context.keys() %}
-		<h1>Yo</h1>
-		{% endif %}
-		<form action="/convert" method="post" enctype="multipart/form-data">
-    		<input type="file" name="files" multiple>
-    		<input type="submit" value="convert"/>
-    	</form>
+<h1>Welcome to Flask</h1>
 
-    	<form action="/audiofiles" method="get">
-    		<input type="submit" value="get audio files">
-    	</form>
+{% if 'audio_files' in context.keys() %}
+	<h1>Yo</h1>
+{% endif %}
+
+<div style="background-color: white;">
+	<div class="row">
+		<form action="/convert" method="post" enctype="multipart/form-data">
+		<input type="file" name="files" multiple>
+		<input type="submit" value="convert">
+	</form>
 	</div>
-    
-    
+	
+	<div class="row">
+		<form action="/audiofiles" method="get">
+    		<input type="submit" value="get audio files">
+		</form>
+	</div>
+	
+</div>
+
 {% endblock %}
