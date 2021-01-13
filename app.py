@@ -20,7 +20,8 @@ app.config['UPLOAD_FOLDER'] = UPLOAD_PATH
 def firstpage():
 	if 'context' in session:
 		session.pop('context')
-		session['context'] = {}
+	
+	session['context'] = {}
 
 	return render_template('index.html', context=session.get('context'))
 
