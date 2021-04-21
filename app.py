@@ -1,10 +1,12 @@
 from flask import Flask, render_template, request, redirect, session, send_file
 from pymongo import MongoClient
 from decouple import config
+from pydub import AudioSegment
 import zipfile, io
 
 import Helper as Helper
 import S3Client as Client
+import soundfile as sf
 
 
 USER = config('USER')
@@ -38,12 +40,17 @@ def home():
 	return render_template('index.html', context=context)
 
 
-def upload(files):
-	for file in files:
-		filename = file.filename
-		s3.upload(file, filename)
-
-
+def upload(files, folder="raw", formatFlag=False):
+    for file in files:
+        if formatFlag:
+            data = file[0]
+            filename = file[1]
+            
+            s3.upload(data, filename, folder)
+        
+        else:
+            s3.upload(file, file.filename, folder)
+            
 @app.route('/download', methods=['GET'])
 def download():
     audio_files = s3.retrieveAudioFiles()
@@ -66,12 +73,22 @@ def convert():
     target_filetype = request.form.get("audio_file_types")
     
     if files:
-        for file in files:
-            filename, filetype = Helper.separateFileName(file.filename)
-            print(filename, end=" ")
-            print(filetype)
+        upload(files)
+        converted_files = []
+        original_files = s3.retrieveAudioFiles() 
+        
+        for file in original_files:
+            original_filename, data = file 
+            filename, filetype = Helper.separateFileName(original_filename)
+            updated_filename = filename + ".wav"
+            print(original_filename)
+            #data = s3.getContents(original_filename)
+            data = io.BytesIO(data)
+            audio = AudioSegment.from_file(data, format='mp3')
+            audio = audio.export("test.mp3", format="mp3")
+            converted_files.append((audio, updated_filename))
             
-        #upload(files)
+        upload(converted_files, "converted", True)
         
     return redirect('/home')
 

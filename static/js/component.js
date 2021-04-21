@@ -1,4 +1,4 @@
-const audio_file_types = ['mp3']
+const audio_file_types = ['mp3', 'wav']
 
 class AudioTypeForm extends React.Component {
 
