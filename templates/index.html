@@ -7,13 +7,14 @@
 	<div class="row">
 		<form action="/convert" method="post" enctype="multipart/form-data">
 			<input type="file" name="files" multiple>
+			<div id="react-component" style="margin-top: 10px;"></div>
 			<input type="submit" value="convert">
 		</form>
 	</div>
 	
 	<div class="row">
-		<form action="/audiofiles" method="get">
-    		<input type="submit" value="get audio files">
+		<form action="/download" method="get">
+    		<input type="submit" value="Download Converted Audio Files">
 		</form>
 	</div>
 

@@ -1,29 +1,34 @@
-from flask import Flask, render_template, request, redirect, session
+from flask import Flask, render_template, request, redirect, session, send_file
 from pymongo import MongoClient
-from gridfs import GridFS 
-import Helper
-import os, base64
+from decouple import config
+import zipfile, io
 
-conn = MongoClient(f"mongodb+srv://{os.environ['USER']}:{os.environ['PASSWORD']}@cluster0.dzuvr.mongodb.net/{os.environ['DB']}?retryWrites=true&w=majority")
-db = conn[os.environ['DB']]
-fs = GridFS(db, os.environ['FS_COLLECTION'])
+import Helper as Helper
+import S3Client as Client
+
+
+USER = config('USER')
+PASSWORD = config('PASSWORD')
+DB = config('DB')
+
+conn = MongoClient(f"mongodb+srv://{USER}:{PASSWORD}@cluster0.dzuvr.mongodb.net/{PASSWORD}?retryWrites=true&w=majority")
+db = conn[DB]
 
 app = Flask(__name__)
 app.secret_key = "super secret key"
 
-ROOT = os.path.abspath(os.curdir)
-UPLOAD_PATH = ROOT + "/uploads"
+s3 = Client.S3Client()
 
-app.config['UPLOAD_FOLDER'] = UPLOAD_PATH
 
 @app.route('/')
 def firstpage():
 	if 'context' in session:
 		session.pop('context')
-	
+
 	session['context'] = {}
 
 	return render_template('index.html', context=session.get('context'))
+
 
 @app.route('/home')
 def home():
@@ -33,41 +38,44 @@ def home():
 	return render_template('index.html', context=context)
 
 
-@app.route('/audiofiles', methods=['GET'])
-def get_audio_files():
-	results = []
+def upload(files):
+	for file in files:
+		filename = file.filename
+		s3.upload(file, filename)
 
-	for file in fs.find():
-		results.append(file.file)
 
-	print(results)
-
-	curr_context = session.get('context')
-	curr_context['audio_files'] = results
-	session['context'] = curr_context
-
-	return redirect('/home')
-
+@app.route('/download', methods=['GET'])
+def download():
+    audio_files = s3.retrieveAudioFiles()
+    
+    memory_file = io.BytesIO() 
+    
+    with zipfile.ZipFile(memory_file, "w") as zf:
+        for file in audio_files:
+            filename = file[0]
+            data = file[1]
+            zf.writestr(filename, data)
+            
+    memory_file.seek(0)
+    
+    return send_file(memory_file, attachment_filename="converted_audio_files.zip", as_attachment=True)
 
 @app.route('/convert', methods=['POST'])
 def convert():
-	files = request.files.getlist("files")
-	
-	for file in files:
-		tmp_path = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
-		file.save(tmp_path)
-
-		encode = ''
-		with open(tmp_path, 'rb') as f:
-			encode = base64.b64encode(f.read())
-
-		filename, filetype = Helper.separateFileName(file.filename)
-
-		fs.put(encode, filename=filename, filetype=filetype, file=file.filename)
-
-	return redirect('/home')
+    files = request.files.getlist("files") 
+    target_filetype = request.form.get("audio_file_types")
+    
+    if files:
+        for file in files:
+            filename, filetype = Helper.separateFileName(file.filename)
+            print(filename, end=" ")
+            print(filetype)
+            
+        #upload(files)
+        
+    return redirect('/home')
 
 
 if __name__ == "__main__":
-	app.debug = True 
+	app.debug = True
 	app.run()

@@ -16,7 +16,15 @@
 	<!-- Latest compiled JavaScript -->
 	<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
 
+	<!--For React-->
+    <script src="https://unpkg.com/react@16/umd/react.development.js" crossorigin></script>
+    <script src="https://unpkg.com/react-dom@16/umd/react-dom.development.js" crossorigin></script>
+    <script src="https://unpkg.com/babel-standalone@6/babel.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/babel-standalone/6.26.0/babel.min.js"></script>
+
 	<script async type="text/javascript" src="{{ url_for('static', filename= 'js/background.js') }}"></script>
+	<script type="text/babel" src="{{ url_for('static', filename= 'js/component.js') }}"></script>
+
 	<link rel="stylesheet" href="{{ url_for('static', filename= 'css/style.css') }}">
 </head>
 
